@@ -56,6 +56,12 @@ If you're using a model that doesn't have a ``title`` attribute, or you just wan
         MyModel.objects.filter(my_special_field__icontains='part')
 
     Additionally, this means that ``autocomplete_search_field`` *must* be a model field and cannot be an arbitrary property or method.
+    
+To use a different lookup behaviour on the Django ORM you can specify a tuple with the lookup type on your model's autocomplete_search_field:
+    
+ .. code-block:: python
+ 
+        autocomplete_search_field = ('my_special_field', 'istartswith')
 
 Custom Label Display
 ====================
