@@ -73,17 +73,23 @@ def search(request):
         return HttpResponseBadRequest()
 
     field_name = getattr(model, 'autocomplete_search_field', None)
-    if issubclass(model, Indexed):
+    custom_lookup = isinstance(field_name, (list, tuple))
+    if not custom_lookup and issubclass(model, Indexed):
         search_backend = get_search_backend()
         if field_name:
             queryset = search_backend.search(search_query, model, fields=[field_name])
         else:
             queryset = search_backend.search(search_query, model)
     else:
+        lookup_type = 'icontains'
+        if custom_lookup:
+            lookup_type = field_name[1]
+            field_name = field_name[0]
         field_name = field_name if field_name else 'title'
         filter_kwargs = dict()
-        filter_kwargs[field_name + '__icontains'] = search_query
+        filter_kwargs["{0}__{1}".format(field_name, lookup_type)] = search_query
         queryset = model.objects.filter(**filter_kwargs)
+
 
     if getattr(queryset, 'live', None):
         # Non-Page models like Snippets won't have a live/published status
